@@ -1,3 +1,5 @@
+import time
+
 def merge(arr, start, mid, end):
     # Count the number of key comparisons made
     comparisons = 0
@@ -82,14 +84,25 @@ def merge_sort(arr, start, end):
 
 
 #------------------------------------------------------------
-# Test array
+# Test array (comment out when not in use or remove after)
 arr = [5, 2, 8, 1, 3]
+
+# Record the CPU time before sorting starts
+start_time = time.process_time()
 
 # Sort the full array
 # start = 0
 # end = len(arr), because end is exclusive
 comparisons = merge_sort(arr, 0, len(arr))
 
+# Record the CPU time after sorting finishes
+end_time = time.process_time()
+
+# Calculate how much CPU time the sorting took
+cpu_time = end_time - start_time 
+
 # Display the result
 print("Sorted array:", arr)
 print("Key comparisons:", comparisons)
+print("CPU time:", cpu_time, "seconds")
+#------------------------------------------------------------
