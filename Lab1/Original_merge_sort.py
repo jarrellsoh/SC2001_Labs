@@ -1,17 +1,13 @@
 import time
 
 def merge(arr, start, mid, end, comparisons):
-    # Copy the left half into a temporary array
-    # start is included, mid is excluded
+    # Copy the left half into a temporary array (start is included, mid is excluded)
     left_arr = arr[start:mid]
 
-    # Copy the right half into another temporary array
-    # mid is included, end is excluded
+    # Copy the right half into another temporary array (mid is included, end is excluded)
     right_arr = arr[mid:end]
 
-    # i tracks the current position in left_arr
-    # j tracks the current position in right_arr
-    # k tracks the position to write into the original array
+    # i tracks the current position in left_arr, j tracks the current position in right_arr, k tracks the position to write into the original array
     i = j = 0
     k = start
     
@@ -33,16 +29,14 @@ def merge(arr, start, mid, end, comparisons):
             arr[k] = right_arr[j]
             j += 1
 
-        # Move to the next position in the original array
+        # Move to the next position in the original
         k += 1
 
-    # If there are leftover elements in the left half,
-    # copy them directly into the original array
+    # If there are leftover elements in the left half, copy them directly into the original array
     if i < len_left:
             arr[k:end] = left_arr[i:]
 
-    # If there are leftover elements in the right half,
-    # copy them directly into the original array
+    # If there are leftover elements in the right half, copy them directly into the original array
     if j < len_right:
             arr[k:end] = right_arr[j:]
 
