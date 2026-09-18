@@ -34,11 +34,11 @@ def merge(arr, start, mid, end, comparisons):
 
     # If there are leftover elements in the left half, copy them directly into the original array
     if i < len_left:
-            arr[k:end] = left_arr[i:]
+        arr[k:end] = left_arr[i:]
 
     # If there are leftover elements in the right half, copy them directly into the original array
     if j < len_right:
-            arr[k:end] = right_arr[j:]
+        arr[k:end] = right_arr[j:]
 
     # Return the number of comparisons made during this merge
     return comparisons
