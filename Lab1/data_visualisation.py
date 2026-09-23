@@ -1,5 +1,6 @@
 #Visualise the data from csv files in graphs using matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import statistics
 
 
@@ -20,9 +21,13 @@ def plot_comparisons_against_input_size():
     plt.figure(figsize=(10, 6))
     plt.plot(input_sizes, average_comparisons, marker='o', label = "S = 10")
     plt.title("Average Comparisons vs Input Size with S = 10")
-    plt.xlabel("Input Size (10^x)")
+    plt.xlabel("Input Size")
+    plt.xscale("log")
     plt.ylabel("Average Comparisons")
     plt.xscale('log')
+    plt.yscale('log')
+    plt.gca().xaxis.set_major_formatter(ticker.LogFormatterMathtext())
+    plt.xticks([3, 4, 5, 6, 7], [r"$10^3$", r"$10^4$", r"$10^5$", r"$10^6$", r"$10^7$"])
     plt.grid(True)
     plt.legend()
     plt.savefig("comparisons_vs_input_size.png")
@@ -132,7 +137,7 @@ def plot_time_against_s():
 
 # ----------Plot the data----------
 
-# plot_comparisons_against_input_size()
+plot_comparisons_against_input_size()
 # plot_comparisons_against_s()
 # plot_time_against_s()
-plot_merge_hybrid_comparisons_and_time()
+# plot_merge_hybrid_comparisons_and_time()
