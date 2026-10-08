@@ -220,13 +220,84 @@ def compare_s_over_multiple_input_sizes():
         for s, comparisons in comparison_dict.items():
             writer.writerow([s] + comparisons)
 
+# Compare multiple S over multiple input sizes, comparing number of comparisons and time taken
+def find_optimal_s():
+    exponent_values = [3, 4, 5, 6, 7]
+    comparison_dict = {}
+    times_dict = {}
+    
+    for x in exponent_values:
+        print(f"Running comparisons for input size 10^{x}...")
+        print("--------------------------------")
+        # Generate unsorted data for each input size
+        size = int(10 ** x)
+        unsorted_data = [random.randint(1, size) for _ in range(size)]
+        
+        # Compare key comparisons for S values from 1 to 20
+        for s in range(2, 21, 2):
+            print(f"Running hybrid sort with S={s}...")
+            # Sort the data using the hybrid sort with the current value of S
+            data = unsorted_data.copy()  # Create a copy of the data to sort for each value of S
+            start_time = time.perf_counter()
+            comparisons = hybrid_sort(data, 0, len(data), s)
+            end_time = time.perf_counter()
+            elapsed_time = end_time - start_time
+            
+            if times_dict.get(s) is None:
+                times_dict[s] = [elapsed_time]
+            else:
+                times_dict[s].append(elapsed_time)
+            
+            if comparison_dict.get(s) is None:
+                comparison_dict[s] = [comparisons]
+            else:
+                comparison_dict[s].append(comparisons)
+
+    # Write number of comparisons for each value of S and for each input size into a CSV file
+    # Also write the time taken for each value of S and for each input size
+    filename = f"comparison_against_s_input_size_10^{x}.csv"
+    with open(filename, "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["S", "10^3 Comparisons", "10^4 Comparisons", "10^5 Comparisons", "10^6 Comparisons", "10^7 Comparisons",
+                         "10^3 Time (s)", "10^4 Time (s)", "10^5 Time (s)", "10^6 Time (s)", "10^7 Time (s)"])
+        for s in range(2, 21, 2):
+            comparisons = comparison_dict.get(s, [])
+            times = times_dict.get(s, [])
+            writer.writerow([s] + comparisons + times)
+
+
+def demonstrate_hybrid_sort(x, s):
+    # Generate random unsorted data
+    size = int(10 ** x)
+    arr = [random.randint(1, size) for _ in range(size)]
+    
+    #Print first 10 and last 10 elements of unsorted array
+    print("Unsorted array: ")
+    print(arr[:10])
+    print(arr[-10:])
+    
+    #Use hybrid sort
+    start_time = time.perf_counter()
+    comparisons = hybrid_sort(arr, 0, len(arr), s)
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    
+    #Print sorted array, number of comarions made, and time taken
+    print("Sorted array:")
+    print(arr[:10])
+    print(arr[-10:])
+    print("Time taken to sort:", elapsed_time, "seconds")
+    print("Number of comparisons made:", comparisons)
 
 # ----------Calling of functions----------
 
-#comparisons_against_s()
-#comparisons_against_input_size()
-compare_merge_hybrid()
-#times_against_s()
-#compare_s_over_multiple_input_sizes()
+# comparisons_against_s()
+# comparisons_against_input_size()
+# compare_merge_hybrid()
+# times_against_s()
+# find_optimal_s()
+# compare_s_over_multiple_input_sizes()
+# find_optimal_s()
+demonstrate_hybrid_sort(6, 10) # First argument is x for n = 10^x, second argument is S value
 
 
