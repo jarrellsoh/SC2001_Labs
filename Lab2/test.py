@@ -1,8 +1,5 @@
 from MinHeap import MinHeap
 
-from MinHeap import MinHeap
-
-
 def test_min_heap():
     print("========== MIN HEAP TEST ==========")
 
