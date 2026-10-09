@@ -1,4 +1,5 @@
 from MinHeap import MinHeap
+from Array import Array
 
 def test_min_heap():
     print("========== MIN HEAP TEST ==========")
@@ -29,4 +30,36 @@ def test_min_heap():
         heap.print_heap()
 
 
+def test_array():
+    print("\n========== ARRAY TEST ==========")
+
+    queue = Array()
+
+    items = [
+        (0, 10),
+        (1, 5),
+        (2, 8),
+        (3, 3),
+        (4, 7),
+        (5, 2)
+    ]
+
+    print("\nEnqueuing:")
+
+    for item in items:
+        print(f"enqueue {item}")
+        queue.enqueue(item)
+        print(queue.queue)
+
+    print("\nDequeuing:")
+
+    while not queue.is_empty():
+        item = queue.dequeue()
+        print(f"dequeue {item}")
+        print(queue.queue)
+
+
+
 test_min_heap()
+test_array()
+
