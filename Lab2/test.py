@@ -1,6 +1,7 @@
 from MinHeap import MinHeap
 from Array import Array
 
+#Test MinHeap priority queue
 def test_min_heap():
     print("========== MIN HEAP TEST ==========")
 
@@ -29,7 +30,7 @@ def test_min_heap():
         print(f"dequeue {item}")
         heap.print_heap()
 
-
+#Test Array priority queue
 def test_array():
     print("\n========== ARRAY TEST ==========")
 
