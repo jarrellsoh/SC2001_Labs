@@ -93,7 +93,7 @@ def reconstruct_path(previous, source, destination):
     return []
 
 
-# Test Dijkstra's algorithm, make changes here
+# Correctness Test for Dijkstra's algorithm
 if __name__ == "__main__":
 
     # Create an adjacency matrix graph with x vertices
