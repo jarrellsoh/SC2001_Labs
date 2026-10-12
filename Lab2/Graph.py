@@ -19,7 +19,7 @@ class AdjacencyListGraph:
 class AdjacencyMatrixGraph:
     def __init__(self, n):
         self.vertex_count = n
-        self.graph = [[0] * n for _ in range(n)]
+        self.graph = [[None] * n for _ in range(n)]
        
     #Add edge to both directions, since undirected graph 
     def add_edge(self, u, v, weight):
@@ -27,9 +27,9 @@ class AdjacencyMatrixGraph:
         self.graph[v][u] = weight
        
     #Return all neighbours of a given vertex u as a list of 2-tuples (v, weight) 
-    def neighbours(self, u):
+    def neighbors(self, u):
         neighbours = []
         for v in range(self.vertex_count):
-            if self.graph[u][v] != 0:
+            if self.graph[u][v] is not None:
                 neighbours.append((v, self.graph[u][v]))
         return neighbours

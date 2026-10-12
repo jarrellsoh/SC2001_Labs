@@ -3,6 +3,8 @@ from Array import Array
 
 
 # Dijkstra's algorithm using adjacency matrix and array priority queue
+# Graph = Graph to process, source = start vertex
+# Stored in adjacency matrix where graph.graph[u][v] = weight if exists, else None
 def dijkstra_array(graph, source):
 
     # Number of vertices in the graph
@@ -16,7 +18,8 @@ def dijkstra_array(graph, source):
     # Dijkstra's algorithm requires non-negative weights
     for u in range(n):
         for v in range(n):
-            if graph.graph[u][v] < 0:
+            weight = graph.graph[u][v]
+            if weight is not None and weight < 0:
                 raise ValueError("Negative edge weight")
 
     # Initialise shortest distances to infinity
@@ -53,7 +56,7 @@ def dijkstra_array(graph, source):
             weight = graph.graph[u][v]
 
             # Skip if no edge or vertex already visited
-            if weight == 0 or visited[v]:
+            if weight is None or visited[v]:
                 continue
 
             # Calculate new distance through u
