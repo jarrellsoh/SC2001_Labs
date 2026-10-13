@@ -1,7 +1,7 @@
 from Graph import AdjacencyListGraph
 from MinHeap import MinHeap
 
-# Dijkstra's algorithm using adjacency lists and min-heap priotiry queue
+# Dijkstra's algorithm using adjacency lists and min-heap priority queue
 # Graph = Graph to process, source = start vertex
 def dijkstra_heap(graph, source):
     # Number of vertices in the graph
