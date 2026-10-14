@@ -66,7 +66,7 @@ class MinHeap:
     def peek(self):
         return self.heap[0] if self.size > 0 else None
     
-    #----------Private heler methods----------
+    #----------Private helper methods----------
     
     #Return index of parent, left child and right child
     def _parent(self, i):
