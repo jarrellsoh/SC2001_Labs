@@ -1,64 +1,27 @@
-import random
+# Part (c): Compare Part A (adjacency matrix + array) with
+# Part B (adjacency list + min-heap) on identical graphs
+#
+# Reuses the graph generator and timing function from Benchmark.py,
+# so Benchmark.py (Part A) is left unchanged.
+
 import csv
-import math
 import matplotlib.pyplot as plt
-from time import perf_counter
-from statistics import median
 
 from Graph import AdjacencyMatrixGraph, AdjacencyListGraph
 from DijkstraArray import dijkstra_array
 from DijkstraHeap import dijkstra_heap
+from Benchmark import generate_edges, measure_time
 
 
 # Number of timed runs per graph (median is taken)
 # Increase for smoother curves, decrease if it takes too long
 REPEATS = 5
 
-# Plot colours (blue = Part A, orange = Part B, grey = theory)
+# Plot colours (blue = Part A, orange = Part B)
 COLOR_ARRAY = "#2a78d6"
 COLOR_HEAP = "#eb6834"
-COLOR_THEORY = "#6b6b66"
 LABEL_ARRAY = "Part A (Adj. Matrix + Array)"
 LABEL_HEAP = "Part B (Adj. List + Min-Heap)"
-
-
-# Generate a random connected, undirected weighted graph
-def generate_edges(n, density, seed):
-    rng = random.Random(seed)  # Fixed seed for reproducible graphs
-
-    # Calculate target number of edges based on graph density
-    # At least n - 1 edges are needed for a connected graph
-    max_edges = n * (n - 1) // 2
-    target_edges = max(n - 1, round(max_edges * density))
-
-    edges = []
-    existing = set()
-
-    # Create a spanning tree to ensure all vertices are connected
-    # Each vertex connects to a randomly selected earlier vertex
-    for v in range(1, n):
-        u = rng.randrange(v)
-        weight = rng.randint(1, 20)
-
-        edges.append((u, v, weight))
-        existing.add((u, v))
-
-    # Find remaining possible edges without duplicates or self-loops
-    available = []
-
-    for u in range(n):
-        for v in range(u + 1, n):
-            if (u, v) not in existing:
-                available.append((u, v))
-
-    # Randomly add more edges until the target density is reached
-    needed = target_edges - len(edges)
-
-    for u, v in rng.sample(available, needed):
-        weight = rng.randint(1, 20)
-        edges.append((u, v, weight))
-
-    return edges
 
 
 # Build BOTH graph representations from the same edges,
@@ -74,25 +37,6 @@ def create_graphs(n, edges):
     return matrix_graph, list_graph
 
 
-# Measure execution time over multiple runs
-def measure_time(algorithm, graph, source, repeats=REPEATS):
-    times = []
-
-    # Repeat using the same graph to reduce timing fluctuations
-    for _ in range(repeats):
-        start = perf_counter()
-
-        algorithm(graph, source)
-
-        end = perf_counter()
-
-        # Calculate execution time in milliseconds
-        times.append((end - start) * 1000)
-
-    # Median reduces the effect of unusually slow runs
-    return median(times)
-
-
 # Run both algorithms on a list of (V, density) configurations
 # Each result row: [V, E, density, Part A time, Part B time]
 def run_experiments(configs, label):
@@ -106,8 +50,8 @@ def run_experiments(configs, label):
         matrix_graph, list_graph = create_graphs(n, edges)
 
         # Measure both implementations starting from vertex 0
-        array_time = measure_time(dijkstra_array, matrix_graph, 0)
-        heap_time = measure_time(dijkstra_heap, list_graph, 0)
+        array_time = measure_time(dijkstra_array, matrix_graph, 0, REPEATS)
+        heap_time = measure_time(dijkstra_heap, list_graph, 0, REPEATS)
 
         results.append([n, e, density, array_time, heap_time])
 
@@ -128,31 +72,11 @@ def save_csv(filename, results):
         writer.writerows(results)
 
 
-# ---------- Theoretical complexity curves ----------
-
-# Part A: O(V^2)
-def theory_array(v, e):
-    return v * v
-
-
-# Part B: O((V + E) log V)
-def theory_heap(v, e):
-    return (v + e) * math.log2(v)
-
-
-# Scale a theoretical curve to the measured times (least-squares constant c),
-# so c * f(V, E) can be drawn on the same axes as the measured timings
-def fit_constant(times, theory_values):
-    numerator = sum(t * f for t, f in zip(times, theory_values))
-    denominator = sum(f * f for f in theory_values)
-    return numerator / denominator
-
-
 # ---------- Plotting ----------
 
-def style_axes(ax, xlabel, title, ylabel="Execution Time (ms)"):
+def style_axes(ax, xlabel, title):
     ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    ax.set_ylabel("Execution Time (ms)")
     ax.set_title(title)
     ax.grid(True, color="#e1e0d9", linewidth=0.8)
     ax.set_axisbelow(True)
@@ -179,7 +103,7 @@ def plot_by_graph_type(type_results):
 
     fig.suptitle("Runtime vs Vertices for Sparse, Average and Dense Graphs")
     fig.tight_layout()
-    fig.savefig("runtime_sparse_average_dense.png", dpi=200)
+    fig.savefig("comparison_sparse_average_dense.png", dpi=200)
     plt.close(fig)
 
 
@@ -191,7 +115,7 @@ def plot_vs_edges(edge_results):
     style_axes(ax, "Number of Edges (E)",
                f"Runtime vs Edges (V = {edge_results[0][0]})")
     fig.tight_layout()
-    fig.savefig("runtime_vs_edges.png", dpi=200)
+    fig.savefig("comparison_vs_edges.png", dpi=200)
     plt.close(fig)
 
 
@@ -218,48 +142,13 @@ def plot_density_bars(bar_results):
                f"Runtime by Edge Density (V = {bar_results[0][0]})")
     ax.grid(False, axis="x")
     fig.tight_layout()
-    fig.savefig("runtime_by_density_bars.png", dpi=200)
+    fig.savefig("comparison_density_bars.png", dpi=200)
     plt.close(fig)
 
 
-# Figure 4: Measured times against the scaled theoretical curves
-# Top row = Part A vs c*V^2, bottom row = Part B vs c*(V+E)logV
-def plot_theory_fit(vertex_results, edge_results, vertex_title):
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+# ---------- Comparison ----------
 
-    setups = [
-        # (row, measured column, theory function, colour, name, theory label)
-        (0, 3, theory_array, COLOR_ARRAY, "Part A", "c · V²"),
-        (1, 4, theory_heap, COLOR_HEAP, "Part B", "c · (V + E) log V"),
-    ]
-
-    panels = [
-        (vertex_results, 0, "Number of Vertices (V)", f"vs Vertices ({vertex_title})"),
-        (edge_results, 1, "Number of Edges (E)", f"vs Edges (V = {edge_results[0][0]})"),
-    ]
-
-    for row, col, theory, color, name, label in setups:
-        for c_idx, (results, x_idx, xlabel, title) in enumerate(panels):
-            ax = axes[row][c_idx]
-            x = [r[x_idx] for r in results]
-            measured = [r[col] for r in results]
-            theory_values = [theory(r[0], r[1]) for r in results]
-            c = fit_constant(measured, theory_values)
-
-            ax.plot(x, measured, marker="o", markersize=4, linewidth=2,
-                    color=color, label=f"{name} measured")
-            ax.plot(x, [c * f for f in theory_values], linestyle="--",
-                    linewidth=2, color=COLOR_THEORY, label=f"Theoretical {label}")
-            style_axes(ax, xlabel, f"{name}: Measured vs Theoretical {title}")
-
-    fig.tight_layout()
-    fig.savefig("theory_fit.png", dpi=200)
-    plt.close(fig)
-
-
-# ---------- Benchmark ----------
-
-def benchmark():
+def compare():
     vertex_sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
 
     # Experiment 1: Vary V for three kinds of graph
@@ -275,11 +164,10 @@ def benchmark():
             [(n, density) for n in vertex_sizes], f"Vary V, {name}")
 
     # Experiment 2: Vary E while keeping V fixed at 400
-    fixed_vertices = 400
     densities = [0.005, 0.01, 0.02, 0.05, 0.10, 0.20, 0.30,
                  0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00]
     edge_results = run_experiments(
-        [(fixed_vertices, d) for d in densities], "Vary E")
+        [(400, d) for d in densities], "Vary E")
 
     # Experiment 3: Fixed V = 1000, a few densities for the bar chart
     bar_densities = [0.002, 0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
@@ -289,20 +177,19 @@ def benchmark():
     # Save raw results
     for name, results in type_results.items():
         tag = name.split()[0].lower()
-        save_csv(f"benchmark_vertices_{tag}.csv", results)
-    save_csv("benchmark_edges.csv", edge_results)
-    save_csv("benchmark_density_bars.csv", bar_results)
+        save_csv(f"comparison_vertices_{tag}.csv", results)
+    save_csv("comparison_edges.csv", edge_results)
+    save_csv("comparison_density_bars.csv", bar_results)
 
     # Generate all figures
     plot_by_graph_type(type_results)
     plot_vs_edges(edge_results)
     plot_density_bars(bar_results)
-    plot_theory_fit(type_results["Average (50% density)"], edge_results, "50% density")
 
-    print("\nBenchmark completed!")
-    print("Figures saved: runtime_sparse_average_dense.png, runtime_vs_edges.png,")
-    print("               runtime_by_density_bars.png, theory_fit.png")
+    print("\nComparison completed!")
+    print("Figures saved: comparison_sparse_average_dense.png,")
+    print("               comparison_vs_edges.png, comparison_density_bars.png")
 
 
 if __name__ == "__main__":
-    benchmark()
+    compare()
